@@ -1,0 +1,97 @@
+body {
+  width: 340px;
+  font-family: Arial, sans-serif;
+  background: #f5f6fa;
+  margin: 0;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.ai-icon {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-weight: bold;
+}
+
+.title {
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: gray;
+}
+
+/* Chat */
+.chat {
+  height: 220px;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  max-width: 75%;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+
+.ai {
+  background: #eaeaea;
+  align-self: flex-start;
+}
+
+.user {
+  background: #6c5ce7;
+  color: white;
+  align-self: flex-end;
+}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 8px;
+  background: white;
+  border-top: 1px solid #ddd;
+}
+
+input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.ask-btn {
+  background: #6c5ce7;
+  border: none;
+  color: white;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 18px;
+  font-weight: bold;
+  margin-left: 6px;
+  cursor: pointer;
+}
