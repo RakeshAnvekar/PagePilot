@@ -147,7 +147,5 @@ If the information is not on the page, the AI responds with:
 - Answer citations and highlights
 
 ---
-
-## 📌 License
-
-This project is for learning, experimentation, and internal demos.
+UI
+<img width="1248" height="927" alt="image" src="https://github.com/user-attachments/assets/74b90bfc-72a2-4949-a548-552c81732406" />
