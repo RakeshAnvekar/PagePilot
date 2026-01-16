@@ -9,6 +9,7 @@ load_dotenv()
 
 app = FastAPI()
 
+# Allow browser extension calls
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,17 +20,46 @@ app.add_middleware(
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🧠 In-memory conversation store (per URL)
+# 🧠 Conversation memory (per page URL)
 conversation_store = {}
 
+# -------- Request model --------
 class AskRequest(BaseModel):
     url: str
     content: str
     question: str
 
+
+# -------- Normalize follow-up / fragment questions --------
+def normalize_question(question: str, conversation: list) -> str:
+    """
+    If the user input is a short or fragmented follow-up,
+    attach it to the previous user question to preserve context.
+    """
+    words = question.strip().split()
+
+    if len(words) < 6 and conversation:
+        last_user_question = None
+
+        for msg in reversed(conversation):
+            if msg["role"] == "user":
+                last_user_question = msg["content"]
+                break
+
+        if last_user_question:
+            return (
+                f"Based on the previous question: '{last_user_question}', "
+                f"answer the following follow-up question: {question}"
+            )
+
+    return question
+
+
+# -------- API Endpoint --------
 @app.post("/ask")
 def ask_page(req: AskRequest):
-    # Limit page content
+
+    # Limit page content to avoid token overflow
     page_content = req.content[:15000]
 
     # Initialize memory for this page
@@ -42,15 +72,16 @@ def ask_page(req: AskRequest):
 You are an AI assistant.
 
 Rules:
-- Answer ONLY using the provided page content.
-- Use conversation history for context.
-- If the answer is not found in the page content, reply exactly:
+- Answer ONLY using the provided page content or direct logical implications of it.
+- Do NOT add external facts or assumptions.
+- If the answer cannot be reasonably inferred from the page content, reply exactly:
   "The result for your question is not available."
 
 Page Content:
 {page_content}
 """
 
+    # Build messages
     messages = [
         {"role": "system", "content": system_prompt}
     ]
@@ -58,9 +89,15 @@ Page Content:
     # Add conversation history
     messages.extend(conversation)
 
-    # Add current user question
-    messages.append({"role": "user", "content": req.question})
+    # Normalize the incoming question (CRITICAL FIX)
+    normalized_question = normalize_question(req.question, conversation)
 
+    messages.append({
+        "role": "user",
+        "content": normalized_question
+    })
+
+    # Call OpenAI
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages
@@ -68,8 +105,10 @@ Page Content:
 
     answer = response.choices[0].message.content.strip()
 
-    # 🧠 Save conversation
+    # Save conversation
     conversation.append({"role": "user", "content": req.question})
     conversation.append({"role": "assistant", "content": answer})
 
-    return {"answer": answer}
+    return {
+        "answer": answer
+    }
